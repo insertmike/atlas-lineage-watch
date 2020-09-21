@@ -14,8 +14,12 @@ import java.nio.file.WatchEvent;
 import java.nio.file.WatchEvent.Kind;
 import java.nio.file.WatchKey;
 import java.nio.file.WatchService;
+import org.apache.log4j.BasicConfigurator;
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
 
 public class AtlasLineageWatch {
+    private static final Logger LOG = LogManager.getLogger(AtlasLineageWatch.class);
 
     private static boolean isSwpPath(Path path){
         return path.toString().startsWith(".") && path.toString().endsWith(".swp");
@@ -35,7 +39,7 @@ public class AtlasLineageWatch {
             ioe.printStackTrace();
         }
 
-        System.out.println("Watching path: " + path);
+        LOG.info("Watching path: " + path);
 
         // We obtain the file system of the Path
         FileSystem fs = path.getFileSystem();
@@ -64,8 +68,7 @@ public class AtlasLineageWatch {
                         if(isSwpPath(newPath)){
                             continue;
                         }
-                        // Output
-                        System.out.println("New path created: " + newPath);
+                        LOG.info("New path created:" + newPath);
                     } else if (ENTRY_MODIFY == kind) {
                         // modified
                         Path newPath = ((WatchEvent<Path>) watchEvent)
@@ -73,8 +76,7 @@ public class AtlasLineageWatch {
                         if(isSwpPath(newPath)){
                             continue;
                         }
-                        // Output
-                        System.out.println("New path modified: " + newPath);
+                        LOG.info("New path modified:" + newPath);
                     }
                 }
 
@@ -93,6 +95,7 @@ public class AtlasLineageWatch {
 
     public static void main(String[] args) throws IOException,
             InterruptedException {
+        BasicConfigurator.configure();
         File dir = new File("/Users/myonchev/watchtest");
         watchDirectoryPath(dir.toPath());
     }
