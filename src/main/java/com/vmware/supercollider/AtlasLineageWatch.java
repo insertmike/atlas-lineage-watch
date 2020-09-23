@@ -96,7 +96,7 @@ public class AtlasLineageWatch {
     public static void main(String[] args) throws IOException,
             InterruptedException {
         BasicConfigurator.configure();
-        File dir = new File("/Users/myonchev/watchtest");
+        File dir = new File(args[0]);
         watchDirectoryPath(dir.toPath());
     }
 }
