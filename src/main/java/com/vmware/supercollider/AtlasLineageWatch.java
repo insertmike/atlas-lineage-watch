@@ -5,8 +5,10 @@ import static java.nio.file.StandardWatchEventKinds.ENTRY_CREATE;
 import static java.nio.file.StandardWatchEventKinds.OVERFLOW;
 import static java.nio.file.StandardWatchEventKinds.ENTRY_MODIFY;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.nio.file.FileSystem;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -25,7 +27,24 @@ public class AtlasLineageWatch {
         return path.toString().startsWith(".") && path.toString().endsWith(".swp");
     }
 
-    public static void watchDirectoryPath(Path path) {
+    private static void runImpalaBridge(String bbkImportFilePath){
+        try{
+            LOG.info("Executing BBK Import File...");
+            ProcessBuilder pb = new ProcessBuilder(bbkImportFilePath);
+            Process p = pb.start();
+            BufferedReader reader = new BufferedReader(new InputStreamReader(p.getInputStream()));
+            String line = null;
+            while ((line = reader.readLine()) != null)
+            {
+                LOG.info("BBK Import File Log: " + line);
+            }
+            LOG.info("BBK Import File finished execution");
+        } catch (Exception ie) {
+            ie.printStackTrace();
+        }
+    }
+
+    public static void watchDirectoryPath(Path path, String bbkImportFilePath) {
         // Sanity check - Check if path is a folder
         try {
             Boolean isFolder = (Boolean) Files.getAttribute(path,
@@ -69,6 +88,7 @@ public class AtlasLineageWatch {
                             continue;
                         }
                         LOG.info("New path created:" + newPath);
+                        runImpalaBridge(bbkImportFilePath);
                     } else if (ENTRY_MODIFY == kind) {
                         // modified
                         Path newPath = ((WatchEvent<Path>) watchEvent)
@@ -77,6 +97,7 @@ public class AtlasLineageWatch {
                             continue;
                         }
                         LOG.info("New path modified:" + newPath);
+                        runImpalaBridge(bbkImportFilePath);
                     }
                 }
 
@@ -92,11 +113,18 @@ public class AtlasLineageWatch {
         }
 
     }
-
+    /*
+     * Command-line interface.
+     * @param args[0]: Absolute Path to BBK Impala Bridge script
+     * @param args[1]: Watch Folder
+     */
     public static void main(String[] args) throws IOException,
             InterruptedException {
+        if(args.length != 2){
+            throw new InterruptedException("Unexpected number of arguments: " + args.length);
+        }
         BasicConfigurator.configure();
         File dir = new File(args[0]);
-        watchDirectoryPath(dir.toPath());
+        watchDirectoryPath(dir.toPath(), args[1]);
     }
 }
