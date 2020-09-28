@@ -14,7 +14,7 @@
                 <configuration>
                     <archive>
                         <manifest>
-                            <mainClass>fully.qualified.MainClass</mainClass>
+                            <mainClass>com.vmware.supercollider.AtlasLineageWatch</mainClass>
                         </manifest>
                     </archive>
                     <descriptorRefs>

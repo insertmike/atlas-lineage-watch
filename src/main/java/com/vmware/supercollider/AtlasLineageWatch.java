@@ -120,9 +120,6 @@ public class AtlasLineageWatch {
      */
     public static void main(String[] args) throws IOException,
             InterruptedException {
-        if(args.length != 2){
-            throw new InterruptedException("Unexpected number of arguments: " + args.length);
-        }
         BasicConfigurator.configure();
         File dir = new File(args[0]);
         watchDirectoryPath(dir.toPath(), args[1]);
